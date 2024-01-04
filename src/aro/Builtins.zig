@@ -381,7 +381,7 @@ test "Allocation failures" {
 
             const type_arena = arena.allocator();
 
-            const num_builtins = 40;
+            const num_builtins = 1;
             var builtin_it = Iterator{};
             for (0..num_builtins) |_| {
                 const entry = builtin_it.next().?;

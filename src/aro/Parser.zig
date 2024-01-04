@@ -4967,124 +4967,14 @@ const CallExpr = union(enum) {
     /// of arguments, `paramCountOverride` is used to tell us how many arguments we should actually expect to see for
     /// these custom-typechecked functions.
     fn paramCountOverride(self: CallExpr) ?u32 {
-        @setEvalBranchQuota(10_000);
-        return switch (self) {
-            .standard => null,
-            .builtin => |builtin| switch (builtin.tag) {
-                Builtin.tagFromName("__c11_atomic_thread_fence").?,
-                Builtin.tagFromName("__c11_atomic_signal_fence").?,
-                Builtin.tagFromName("__c11_atomic_is_lock_free").?,
-                Builtin.tagFromName("__builtin_isinf").?,
-                Builtin.tagFromName("__builtin_isinf_sign").?,
-                Builtin.tagFromName("__builtin_isnan").?,
-                => 1,
-
-                Builtin.tagFromName("__builtin_complex").?,
-                Builtin.tagFromName("__c11_atomic_load").?,
-                Builtin.tagFromName("__c11_atomic_init").?,
-                => 2,
-
-                Builtin.tagFromName("__c11_atomic_store").?,
-                Builtin.tagFromName("__c11_atomic_exchange").?,
-                Builtin.tagFromName("__c11_atomic_fetch_add").?,
-                Builtin.tagFromName("__c11_atomic_fetch_sub").?,
-                Builtin.tagFromName("__c11_atomic_fetch_or").?,
-                Builtin.tagFromName("__c11_atomic_fetch_xor").?,
-                Builtin.tagFromName("__c11_atomic_fetch_and").?,
-                Builtin.tagFromName("__atomic_fetch_add").?,
-                Builtin.tagFromName("__atomic_fetch_sub").?,
-                Builtin.tagFromName("__atomic_fetch_and").?,
-                Builtin.tagFromName("__atomic_fetch_xor").?,
-                Builtin.tagFromName("__atomic_fetch_or").?,
-                Builtin.tagFromName("__atomic_fetch_nand").?,
-                Builtin.tagFromName("__atomic_add_fetch").?,
-                Builtin.tagFromName("__atomic_sub_fetch").?,
-                Builtin.tagFromName("__atomic_and_fetch").?,
-                Builtin.tagFromName("__atomic_xor_fetch").?,
-                Builtin.tagFromName("__atomic_or_fetch").?,
-                Builtin.tagFromName("__atomic_nand_fetch").?,
-                Builtin.tagFromName("__builtin_add_overflow").?,
-                Builtin.tagFromName("__builtin_sub_overflow").?,
-                Builtin.tagFromName("__builtin_mul_overflow").?,
-                => 3,
-
-                Builtin.tagFromName("__c11_atomic_compare_exchange_strong").?,
-                Builtin.tagFromName("__c11_atomic_compare_exchange_weak").?,
-                => 5,
-
-                Builtin.tagFromName("__atomic_compare_exchange").?,
-                Builtin.tagFromName("__atomic_compare_exchange_n").?,
-                => 6,
-                else => null,
-            },
-        };
+        _ = self;
+        return null;
     }
 
     fn returnType(self: CallExpr, p: *Parser, callable_ty: Type) Type {
-        return switch (self) {
-            .standard => callable_ty.returnType(),
-            .builtin => |builtin| switch (builtin.tag) {
-                Builtin.tagFromName("__c11_atomic_exchange").? => {
-                    if (p.list_buf.items.len != 4) return Type.invalid; // wrong number of arguments; already an error
-                    const second_param = p.list_buf.items[2];
-                    return p.nodes.items(.ty)[@intFromEnum(second_param)];
-                },
-                Builtin.tagFromName("__c11_atomic_load").? => {
-                    if (p.list_buf.items.len != 3) return Type.invalid; // wrong number of arguments; already an error
-                    const first_param = p.list_buf.items[1];
-                    const ty = p.nodes.items(.ty)[@intFromEnum(first_param)];
-                    if (!ty.isPtr()) return Type.invalid;
-                    return ty.elemType();
-                },
-
-                Builtin.tagFromName("__atomic_fetch_add").?,
-                Builtin.tagFromName("__atomic_add_fetch").?,
-                Builtin.tagFromName("__c11_atomic_fetch_add").?,
-
-                Builtin.tagFromName("__atomic_fetch_sub").?,
-                Builtin.tagFromName("__atomic_sub_fetch").?,
-                Builtin.tagFromName("__c11_atomic_fetch_sub").?,
-
-                Builtin.tagFromName("__atomic_fetch_and").?,
-                Builtin.tagFromName("__atomic_and_fetch").?,
-                Builtin.tagFromName("__c11_atomic_fetch_and").?,
-
-                Builtin.tagFromName("__atomic_fetch_xor").?,
-                Builtin.tagFromName("__atomic_xor_fetch").?,
-                Builtin.tagFromName("__c11_atomic_fetch_xor").?,
-
-                Builtin.tagFromName("__atomic_fetch_or").?,
-                Builtin.tagFromName("__atomic_or_fetch").?,
-                Builtin.tagFromName("__c11_atomic_fetch_or").?,
-
-                Builtin.tagFromName("__atomic_fetch_nand").?,
-                Builtin.tagFromName("__atomic_nand_fetch").?,
-                Builtin.tagFromName("__c11_atomic_fetch_nand").?,
-                => {
-                    if (p.list_buf.items.len != 3) return Type.invalid; // wrong number of arguments; already an error
-                    const second_param = p.list_buf.items[2];
-                    return p.nodes.items(.ty)[@intFromEnum(second_param)];
-                },
-                Builtin.tagFromName("__builtin_complex").? => {
-                    if (p.list_buf.items.len < 1) return Type.invalid; // not enough arguments; already an error
-                    const last_param = p.list_buf.items[p.list_buf.items.len - 1];
-                    return p.nodes.items(.ty)[@intFromEnum(last_param)].makeComplex();
-                },
-                Builtin.tagFromName("__atomic_compare_exchange").?,
-                Builtin.tagFromName("__atomic_compare_exchange_n").?,
-                Builtin.tagFromName("__c11_atomic_is_lock_free").?,
-                => .{ .specifier = .bool },
-                else => callable_ty.returnType(),
-
-                Builtin.tagFromName("__c11_atomic_compare_exchange_strong").?,
-                Builtin.tagFromName("__c11_atomic_compare_exchange_weak").?,
-                => {
-                    if (p.list_buf.items.len != 6) return Type.invalid; // wrong number of arguments
-                    const third_param = p.list_buf.items[3];
-                    return p.nodes.items(.ty)[@intFromEnum(third_param)];
-                },
-            },
-        };
+        _ = self;
+        _ = p;
+        return callable_ty.returnType();
     }
 
     fn finish(self: CallExpr, p: *Parser, ty: Type, list_buf_top: usize, arg_count: u32) Error!Result {
